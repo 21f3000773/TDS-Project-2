@@ -13,7 +13,7 @@ This analysis provides a comprehensive overview of the dataset that includes var
 - **Correlation**: Significant positive correlations are observed between the Life Ladder and several variables, including:
   - **Log GDP per capita** (0.78): Strong relationship, indicating higher economic productivity leads to higher life satisfaction.
   - **Social Support** (0.72): Suggests that stronger social networks contribute to greater well-being.
-  - **Healthy life expectancy** (0.71): People’s perception of their well-being is closely linked to their health.
+  - **Healthy life expectancy** (0.71): Peopleâ€™s perception of their well-being is closely linked to their health.
 
 ### 4. Economic Factors
 - **Log GDP per Capita**: The average Log GDP per capita is around 9.40, with a standard deviation of 1.15. The scores range from 5.527 to 11.676, further illustrating economic diversity across the countries.
@@ -39,3 +39,6 @@ This analysis provides a comprehensive overview of the dataset that includes var
 
 ### Conclusion
 The dataset showcases how various socio-economic indicators relate to perceived happiness and well-being. Notably, GDP per capita, social support, and healthy life expectancy emerge as strong predictors of life satisfaction. The presence of missing data in key areas suggests the necessity for caution in deriving conclusions, as it may skew results. Future analyses could benefit from a deeper temporal analysis to track the changes in these metrics across the years and their impact on life satisfaction over time.
+
+
+![correlation_heatmap](https://github.com/user-attachments/assets/d151aafc-7705-4437-ba11-901de920826f)
