@@ -58,3 +58,7 @@ To drive further insights:
 - Investigate the reason behind the high number of movies and if this affects engagement levels.
 - Clean up missing values, especially in the 'by' field, to allow for a deeper understanding of author contribution.
 - Explore potential trends over time associated with the top scoring titles or authors for enhanced relevance and applicability in future analyses.
+
+![correlation_heatmap](https://github.com/user-attachments/assets/be260988-9f04-4015-b40a-875a05299d36)
+
+  
