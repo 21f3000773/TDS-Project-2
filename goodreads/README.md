@@ -22,7 +22,7 @@ The provided data summary gives insights into a dataset of 10,000 books, includi
 - **isbn13**: 585 missing entries; unique identifiers appear to be utilized effectively.
 
 #### Artist Information:
-- **authors**: There are 4,664 unique authors, with ‘Stephen King’ being the most frequent (60 books). This indicates a rich diversity of authors, but some authors dominate the dataset in terms of frequency.
+- **authors**: There are 4,664 unique authors, with â€˜Stephen Kingâ€™ being the most frequent (60 books). This indicates a rich diversity of authors, but some authors dominate the dataset in terms of frequency.
 
 ### 3. Ratings and Reviews
 #### Average Ratings:
@@ -43,7 +43,7 @@ This distribution shows a long tail where higher ratings are significantly more 
 
 ### 4. Missing Values Analysis
 The missing values status indicates:
-- **ISBN**: 700 missing (it’s important for book identification and inventory).
+- **ISBN**: 700 missing (itâ€™s important for book identification and inventory).
 - **isbn13**: 585 missing.
 - **original_publication_year**: 21 missing, which is manageable.
 - **original_title**: Also has a notable 585 missing entries.
@@ -70,3 +70,5 @@ The correlation matrix reveals insights:
 - Improve data completeness by filling in missing ISBNs and titles if possible.
 - Conduct deeper analysis on the most rated authors to understand reading trends.
 - Monitor the correlation patterns to deduce implications for future publishing strategies or reader engagement campaigns.
+![correlation_heatmap](https://github.com/user-attachments/assets/092d4acd-8a47-492c-9b72-57d007613682)
+
