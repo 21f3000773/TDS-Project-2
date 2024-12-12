@@ -1,12 +1,13 @@
 # /// script
-# requires-python = ">=3.11"
+# requires-python = ">=3.12"
 # dependencies = [
-#   "pandas",
-#   "seaborn",
-#   "matplotlib",
-#   "httpx",
-#   "chardet",
-#   "python-dotenv",
+#     "httpx",
+#     "pandas",
+#     "chardet",
+#     "matplotlib",
+#     "python-dotenv",
+#     "rich",
+#     "seaborn",
 # ]
 # ///
 
@@ -17,6 +18,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import httpx
 import chardet
+
 
 # Constants
 API_URL = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
@@ -109,7 +111,7 @@ def main(file_path):
     narrative = generate_narrative(analysis, visualizations)
 
     # Save narrative to README.md, include the heatmap
-    with open('README.md', 'w', encoding='utf-8') as f:
+    with open('README.md', 'w') as f:
         f.write(narrative)
         if "correlation_heatmap.png" in visualizations:
             f.write("\n\n![Correlation Heatmap](correlation_heatmap.png)")
@@ -119,3 +121,5 @@ if __name__ == "__main__":
         print("Usage: python autolysis.py <dataset.csv>")
         sys.exit(1)
     main(sys.argv[1])
+
+
