@@ -37,5 +37,5 @@ def main():
         if os.path.exists(file_path):
             analyze_dataset(file_path, output_dir)
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     main()
