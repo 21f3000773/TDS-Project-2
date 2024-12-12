@@ -20,8 +20,13 @@ The analysis of the dataset encompassing 10,000 book records provides rich insig
    - There are 4,664 unique authors, indicating diverse writing styles and subjects.
    - The most common language is English, but there's an opportunity for expansion into non-English markets given the presence of 25 unique language codes.
 
+<<<<<<< HEAD
 5. **Visual Representation:**
    - Initial visualizations, including distributions for IDs and a correlation heatmap are valuable for quickly grasping the dataset's key features.
+=======
+#### Artist Information:
+- **authors**: There are 4,664 unique authors, with ‘Stephen King’ being the most frequent (60 books). This indicates a rich diversity of authors, but some authors dominate the dataset in terms of frequency.
+>>>>>>> 8ae87b15392decfce22a2c0b2c95de9743c79416
 
 #### Missing Values
 
@@ -29,7 +34,18 @@ The dataset shows several columns with missing values:
 - ISBNs (`isbn` and `isbn13`) have significant missing rates, affecting 7% and 5.85% of records, respectively. This can hinder proper tracking and sales management.
 - The `original_publication_year`, `original_title`, and `language_code` also show missing entries. These may reflect incomplete data collection processes.
 
+<<<<<<< HEAD
 #### Correlation Insights
+=======
+### 4. Missing Values Analysis
+The missing values status indicates:
+- **ISBN**: 700 missing (it’s important for book identification and inventory).
+- **isbn13**: 585 missing.
+- **original_publication_year**: 21 missing, which is manageable.
+- **original_title**: Also has a notable 585 missing entries.
+  
+The missing data may require attention, especially in identifiers, which could hinder searches and inventories.
+>>>>>>> 8ae87b15392decfce22a2c0b2c95de9743c79416
 
 1. **Negative Correlations with Ratings:**
    - There are notable negative correlations between `books_count` and various ratings metrics (including `ratings_count`, `work_ratings_count`, etc.). This suggests that works with fewer books published generally accumulate higher ratings, perhaps due to a more focused audience or better quality control.
@@ -38,6 +54,7 @@ The dataset shows several columns with missing values:
 2. **Positive Correlation in Ratings:**
    - The ratings across levels (1 through 5) show a strong correlation with one another, indicating that a higher score in one category likely corresponds with higher scores in others.
 
+<<<<<<< HEAD
 #### Actionable Insights
 
 1. **Improve Data Completeness:**
@@ -61,3 +78,11 @@ The dataset shows several columns with missing values:
 This comprehensive analysis reveals a wealth of information that can guide strategic decisions in publishing, marketing, and audience engagement for the book ecosystem. By focusing on data completeness, targeted marketing, content diversification, and ongoing evaluation, stakeholders can enhance their offerings and better meet reader preferences.
 
 ![Correlation Heatmap](correlation_heatmap.png)
+=======
+### Recommendations
+- Improve data completeness by filling in missing ISBNs and titles if possible.
+- Conduct deeper analysis on the most rated authors to understand reading trends.
+- Monitor the correlation patterns to deduce implications for future publishing strategies or reader engagement campaigns.
+![correlation_heatmap](https://github.com/user-attachments/assets/092d4acd-8a47-492c-9b72-57d007613682)
+
+>>>>>>> 8ae87b15392decfce22a2c0b2c95de9743c79416

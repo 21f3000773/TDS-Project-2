@@ -59,6 +59,7 @@ Based on the data analysis, we have gathered several key statistics, insights, a
 
 3. **Creator Engagement**: Establish partnerships with top contributors to leverage their existing audience. This could also include training or mediums in which they can increase brand engagement.
 
+<<<<<<< HEAD
 4. **Data Cleaning**: Address missing and incomplete data entries to ensure future analyses are more reliable. This can involve either adding metrics to fill missing values or using data-cleaning algorithms.
 
 5. **User Engagement Surveys**: Implementing direct user feedback strategies could illuminate why repeatability ratings are low and assist in creating more engaging content.
@@ -66,3 +67,13 @@ Based on the data analysis, we have gathered several key statistics, insights, a
 By leveraging these insights, strategic decision-making can target improvement areas effectively, thus enhancing overall engagement, user satisfaction, and content quality.
 
 ![Correlation Heatmap](correlation_heatmap.png)
+=======
+To drive further insights:
+- Investigate the reason behind the high number of movies and if this affects engagement levels.
+- Clean up missing values, especially in the 'by' field, to allow for a deeper understanding of author contribution.
+- Explore potential trends over time associated with the top scoring titles or authors for enhanced relevance and applicability in future analyses.
+
+![correlation_heatmap](https://github.com/user-attachments/assets/be260988-9f04-4015-b40a-875a05299d36)
+
+  
+>>>>>>> 8ae87b15392decfce22a2c0b2c95de9743c79416

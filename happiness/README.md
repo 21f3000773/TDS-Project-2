@@ -2,8 +2,17 @@
 
 #### Summary Statistics
 
+<<<<<<< HEAD
 **Country Representation:**
 - The dataset comprises 2363 entries across 165 unique countries, with Argentina as the most frequently represented country (18 entries).
+=======
+### 3. Life Ladder (Measures of Well-Being)
+- **Mean Life Ladder Score**: The average score is approximately 5.48, with scores ranging from 1.281 to 8.019. This range indicates a notable disparity in subjective well-being across different countries or contexts.
+- **Correlation**: Significant positive correlations are observed between the Life Ladder and several variables, including:
+  - **Log GDP per capita** (0.78): Strong relationship, indicating higher economic productivity leads to higher life satisfaction.
+  - **Social Support** (0.72): Suggests that stronger social networks contribute to greater well-being.
+  - **Healthy life expectancy** (0.71): People’s perception of their well-being is closely linked to their health.
+>>>>>>> 8ae87b15392decfce22a2c0b2c95de9743c79416
 
 **Temporal Distribution:**
 - The data spans from the year 2005 to 2023, with an average year around 2014.76, indicating a focus on recent trends in global well-being.
@@ -62,7 +71,14 @@ The created visualizations aid in understanding key trends:
    - Addressing the gaps in critical variables such as Healthy Life Expectancy and Generosity through dedicated data collection will enable richer analyses and better policy formulation.
 
 ### Conclusion
+<<<<<<< HEAD
 
 The analysis highlights critical interdependencies between economic, social, and health variables in influencing life satisfaction across countries. By implementing policies focused on improving economic conditions, social support, and healthcare access while combating corruption, countries can enhance overall well-being in their populations. The identified missing data points present opportunities for further research, allowing for more comprehensive understanding and targeting of interventions.
 
 ![Correlation Heatmap](correlation_heatmap.png)
+=======
+The dataset showcases how various socio-economic indicators relate to perceived happiness and well-being. Notably, GDP per capita, social support, and healthy life expectancy emerge as strong predictors of life satisfaction. The presence of missing data in key areas suggests the necessity for caution in deriving conclusions, as it may skew results. Future analyses could benefit from a deeper temporal analysis to track the changes in these metrics across the years and their impact on life satisfaction over time.
+
+
+![correlation_heatmap](https://github.com/user-attachments/assets/d151aafc-7705-4437-ba11-901de920826f)
+>>>>>>> 8ae87b15392decfce22a2c0b2c95de9743c79416
