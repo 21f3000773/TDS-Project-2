@@ -8,11 +8,11 @@ import chardet
 
 # Ensure seaborn is installed
 try:
-    import seaborn
+    import seaborn as sns
 except ImportError:
     print("Seaborn is not installed. Installing now...")
     os.system("pip install seaborn")
-    import seaborn
+    import seaborn as sns
 
 # Constants
 API_URL = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
