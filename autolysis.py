@@ -1,3 +1,16 @@
+# requires-python = ">=3.12"
+# dependencies = [
+#     "httpx",
+#     "pandas",
+#     "chardet",
+#     "matplotlib",
+#     "python-dotenv",
+#     "rich",
+#     "seaborn",
+# ]
+# ///
+
+
 import os
 import sys
 import pandas as pd
