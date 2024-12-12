@@ -126,4 +126,9 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python autolysis.py <dataset.csv>")
         sys.exit(1)
+<<<<<<< HEAD
     main(sys.argv[1])
+=======
+    main(sys.argv[1])
+
+>>>>>>> ac24e402b7ed633941cb1fa6ae47cd13cae21fe4
