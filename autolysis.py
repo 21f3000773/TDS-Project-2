@@ -1,15 +1,3 @@
-# /// script
-# requires-python = ">=3.11"
-# dependencies = [
-#   "pandas",
-#   "seaborn",
-#   "matplotlib",
-#   "httpx",
-#   "chardet",
-#   "python-dotenv",
-# ]
-# ///
-
 import os
 import sys
 import pandas as pd
@@ -128,4 +116,15 @@ if __name__ == "__main__":
         sys.exit(1)
     main(sys.argv[1])
 
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "pandas",
+#   "seaborn",
+#   "matplotlib",
+#   "httpx",
+#   "chardet",
+#   "python-dotenv",
+# ]
+# ///
 
