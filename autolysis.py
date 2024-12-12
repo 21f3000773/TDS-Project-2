@@ -11,7 +11,9 @@ try:
     import seaborn as sns
 except ImportError:
     print("Seaborn is not installed. Installing now...")
-    os.system("pip install seaborn")
+    import subprocess
+    import sys
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "seaborn"])
     import seaborn as sns
 
 # Constants
