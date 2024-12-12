@@ -1,3 +1,11 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "pandas",
+#     "matplotlib",
+# ]
+# ///
+
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
