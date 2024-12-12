@@ -127,9 +127,3 @@ if __name__ == "__main__":
         print("Usage: python autolysis.py <dataset.csv>")
         sys.exit(1)
     main(sys.argv[1])
-
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 42d468a89470ff400d57f3a3f805abd66ab9f204
