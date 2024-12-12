@@ -18,14 +18,6 @@ import matplotlib.pyplot as plt
 import httpx
 import chardet
 
-# Ensure seaborn is installed
-'''try:
-    import seaborn as sns
-except ImportError:
-    print("Seaborn is not installed. Installing now...")
-    os.system("pip install seaborn")
-    import seaborn as sns'''
-
 # Constants
 API_URL = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
 AIPROXY_TOKEN = input("Please enter your API token: ")
@@ -117,7 +109,7 @@ def main(file_path):
     narrative = generate_narrative(analysis, visualizations)
 
     # Save narrative to README.md, include the heatmap
-    with open('README.md', 'w') as f:
+    with open('README.md', 'w', encoding='utf-8') as f:
         f.write(narrative)
         if "correlation_heatmap.png" in visualizations:
             f.write("\n\n![Correlation Heatmap](correlation_heatmap.png)")
