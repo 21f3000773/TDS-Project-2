@@ -7,14 +7,14 @@ import httpx
 import chardet
 
 # Ensure seaborn is installed
-try:
+'''try:
     import seaborn as sns
 except ImportError:
     print("Seaborn is not installed. Installing now...")
     import subprocess
     import sys
     subprocess.check_call([sys.executable, "-m", "pip", "install", "seaborn"])
-    import seaborn as sns
+    import seaborn as sns'''
 
 # Constants
 API_URL = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
