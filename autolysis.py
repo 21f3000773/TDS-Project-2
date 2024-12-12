@@ -14,35 +14,19 @@ import os
 import sys
 import pandas as pd
 import seaborn as sns
-import matplotlib
 import matplotlib.pyplot as plt
 import httpx
 import chardet
-from dotenv import load_dotenv
-
-# Force non-interactive matplotlib backend
-matplotlib.use('Agg')
-
-# Load environment variables
-load_dotenv()
 
 # Constants
 API_URL = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
-AIPROXY_TOKEN = os.getenv("AIPROXY_TOKEN")
-
-if not AIPROXY_TOKEN:
-    raise ValueError("API token not set. Please set AIPROXY_TOKEN in the environment.")
-
+AIPROXY_TOKEN = input("Please enter your API token: ")
 def load_data(file_path):
     """Load CSV data with encoding detection."""
-    try:
-        with open(file_path, 'rb') as f:
-            result = chardet.detect(f.read())
-        encoding = result['encoding']
-        return pd.read_csv(file_path, encoding=encoding)
-    except Exception as e:
-        print(f"Error loading file: {e}")
-        sys.exit(1)
+    with open(file_path, 'rb') as f:
+        result = chardet.detect(f.read())
+    encoding = result['encoding']
+    return pd.read_csv(file_path, encoding=encoding)
 
 def analyze_data(df):
     """Perform basic data analysis."""
@@ -54,7 +38,7 @@ def analyze_data(df):
     }
     return analysis
 
-def visualize_data(df, output_dir):
+def visualize_data(df):
     """Generate and save visualizations."""
     sns.set(style="whitegrid")
     numeric_columns = df.select_dtypes(include=['number']).columns
@@ -62,7 +46,7 @@ def visualize_data(df, output_dir):
         plt.figure()
         sns.histplot(df[column].dropna(), kde=True)
         plt.title(f'Distribution of {column}')
-        plt.savefig(os.path.join(output_dir, f'{column}_distribution.png'))
+        plt.savefig(f'{column}_distribution.png')
         plt.close()
 
 def generate_narrative(analysis):
@@ -88,31 +72,16 @@ def generate_narrative(analysis):
         print(f"An unexpected error occurred: {e}")
     return "Narrative generation failed due to an error."
 
-def main():
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Analyze datasets and generate insights.")
-    parser.add_argument("file_path", help="Path to the dataset CSV file.")
-    parser.add_argument("-o", "--output_dir", default="output", help="Directory to save outputs.")
-    args = parser.parse_args()
-
-    os.makedirs(args.output_dir, exist_ok=True)
-
-    # Load data
-    df = load_data(args.file_path)
-
-    # Analyze data
+def main(file_path):
+    df = load_data(file_path)
     analysis = analyze_data(df)
-
-    # Visualize data
-    visualize_data(df, args.output_dir)
-
-    # Generate narrative
+    visualize_data(df)
     narrative = generate_narrative(analysis)
-
-    # Save narrative
-    with open(os.path.join(args.output_dir, 'README.md'), 'w') as f:
+    with open('README.md', 'w') as f:
         f.write(narrative)
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: python autolysis.py <dataset.csv>")
+        sys.exit(1)
+    main(sys.argv[1])
