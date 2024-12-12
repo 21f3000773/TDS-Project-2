@@ -1,14 +1,3 @@
-# /// script
-# requires-python = ">=3.12"
-# dependencies = [
-#     "httpx",
-#     "pandas",
-#     "platformdirs",
-#     "python-dotenv",
-#     "rich",
-# ]
-# ///
-
 import os
 import sys
 import pandas as pd
@@ -19,11 +8,11 @@ import chardet
 
 # Ensure seaborn is installed
 try:
-    import seaborn as sns
+    import seaborn
 except ImportError:
     print("Seaborn is not installed. Installing now...")
     os.system("pip install seaborn")
-    import seaborn as sns
+    import seaborn
 
 # Constants
 API_URL = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
@@ -95,19 +84,16 @@ def generate_narrative(analysis, visualizations):
         "model": "gpt-4o-mini",
         "messages": [{"role": "user", "content": prompt}]
     }
-    for attempt in range(3):  # Retry up to 3 times
-        try:
-            response = httpx.post(API_URL, headers=headers, json=data, timeout=60.0)
-            response.raise_for_status()
-            return response.json()['choices'][0]['message']['content']
-        except httpx.RequestError as e:
-            if attempt < 2:  # Retry if not the last attempt
-                print(f"Retrying due to request error: {e}")
-                continue
-            else:
-                print(f"Request error occurred after 3 attempts: {e}")
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
+    try:
+        response = httpx.post(API_URL, headers=headers, json=data, timeout=30.0)
+        response.raise_for_status()
+        return response.json()['choices'][0]['message']['content']
+    except httpx.HTTPStatusError as e:
+        print(f"HTTP error occurred: {e}")
+    except httpx.RequestError as e:
+        print(f"Request error occurred: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
     return "Narrative generation failed due to an error."
 
 def main(file_path):
@@ -129,3 +115,14 @@ if __name__ == "__main__":
         print("Usage: python autolysis.py <dataset.csv>")
         sys.exit(1)
     main(sys.argv[1])
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "httpx",
+#     "pandas",
+#     "platformdirs",
+#     "python-dotenv",
+#     "rich",
+# ]
+# ///
