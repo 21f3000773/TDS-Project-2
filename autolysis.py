@@ -1,3 +1,15 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "pandas",
+#   "seaborn",
+#   "matplotlib",
+#   "httpx",
+#   "chardet",
+#   "python-dotenv",
+# ]
+# ///
+
 import os
 import sys
 import pandas as pd
@@ -7,12 +19,12 @@ import httpx
 import chardet
 
 # Ensure seaborn is installed
-try:
+'''try:
     import seaborn as sns
 except ImportError:
     print("Seaborn is not installed. Installing now...")
     os.system("pip install seaborn")
-    import seaborn as sns
+    import seaborn as sns'''
 
 # Constants
 API_URL = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
@@ -116,15 +128,5 @@ if __name__ == "__main__":
         sys.exit(1)
     main(sys.argv[1])
 
-# /// script
-# requires-python = ">=3.11"
-# dependencies = [
-#   "pandas",
-#   "seaborn",
-#   "matplotlib",
-#   "httpx",
-#   "chardet",
-#   "python-dotenv",
-# ]
-# ///
+
 
