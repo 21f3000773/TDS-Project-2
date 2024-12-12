@@ -15,73 +15,123 @@ import sys
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import openai
 import httpx
-import chardet
 
-# Constants
-API_URL = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
-AIPROXY_TOKEN = input("Please enter your API token: ")
+# Set OpenAI API key (Ensure it's set as an environment variable)
+api_url = "https://api.openai.com/v1/models"  # Official OpenAI endpoint
+headers = {
+    "Authorization": f"Bearer {input('Enter your API key: ').strip()}",
+    "Content-Type": "application/json"
+}
+
+try:
+    response = httpx.get(api_url, headers=headers, timeout=10)
+    response.raise_for_status()
+    print("Authentication successful:", response.json())
+except httpx.HTTPStatusError as e:
+    print(f"Authentication failed: {e}")
+except Exception as ex:
+    print(f"An unexpected error occurred: {ex}")
+
 def load_data(file_path):
-    """Load CSV data with encoding detection."""
-    with open(file_path, 'rb') as f:
-        result = chardet.detect(f.read())
-    encoding = result['encoding']
-    return pd.read_csv(file_path, encoding=encoding)
+    """Load CSV data and handle encoding issues."""
+    try:
+        return pd.read_csv(file_path, encoding='utf-8')
+    except UnicodeDecodeError:
+        print("UTF-8 decoding failed, trying 'ISO-8859-1'")
+        return pd.read_csv(file_path, encoding='ISO-8859-1')
 
-def analyze_data(df):
-    """Perform basic data analysis."""
-    numeric_df = df.select_dtypes(include=['number'])  # Select only numeric columns
+def analyze_data(data):
+    """Perform basic dataset analysis."""
+    numeric_data = data.select_dtypes(include=['number'])
     analysis = {
-        'summary': df.describe(include='all').to_dict(),
-        'missing_values': df.isnull().sum().to_dict(),
-        'correlation': numeric_df.corr().to_dict()  # Compute correlation only on numeric columns
+        "Shape": data.shape,
+        "Columns": data.dtypes.to_dict(),
+        "Missing Values": data.isnull().sum().to_dict(),
+        "Sample Data": data.head().to_dict(),
+        "Correlation Matrix": numeric_data.corr().to_dict() if not numeric_data.empty else None
     }
     return analysis
 
-def visualize_data(df):
-    """Generate and save visualizations."""
-    sns.set(style="whitegrid")
-    numeric_columns = df.select_dtypes(include=['number']).columns
-    for column in numeric_columns:
-        plt.figure()
-        sns.histplot(df[column].dropna(), kde=True)
-        plt.title(f'Distribution of {column}')
-        plt.savefig(f'{column}_distribution.png')
+def visualize_data(data):
+    """Create and save visualizations."""
+    numeric_data = data.select_dtypes(include=['number'])
+    if not numeric_data.empty:
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(numeric_data.corr(), annot=True, cmap='coolwarm', fmt='.2f')
+        plt.title('Correlation Matrix')
+        plt.savefig('correlation_heatmap.png')
         plt.close()
+        return 'correlation_heatmap.png'
+    return None
 
 def generate_narrative(analysis):
-    """Generate narrative using LLM."""
-    headers = {
-        'Authorization': f'Bearer {AIPROXY_TOKEN}',
-        'Content-Type': 'application/json'
-    }
-    prompt = f"Provide a detailed analysis based on the following data summary: {analysis}"
-    data = {
-        "model": "gpt-4o-mini",
-        "messages": [{"role": "user", "content": prompt}]
-    }
+    """Generate insights using OpenAI API."""
     try:
-        response = httpx.post(API_URL, headers=headers, json=data, timeout=30.0)
-        response.raise_for_status()
-        return response.json()['choices'][0]['message']['content']
-    except httpx.HTTPStatusError as e:
-        print(f"HTTP error occurred: {e}")
-    except httpx.RequestError as e:
-        print(f"Request error occurred: {e}")
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a data analysis assistant."},
+                {"role": "user", "content": f"Analyze the dataset with the following details: {analysis}"}
+            ]
+        )
+        return response['choices'][0]['message']['content']
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-    return "Narrative generation failed due to an error."
+        return f"An error occurred while generating insights: {e}"
 
-def main(file_path):
-    df = load_data(file_path)
-    analysis = analyze_data(df)
-    visualize_data(df)
-    narrative = generate_narrative(analysis)
-    with open('README.md', 'w') as f:
-        f.write(narrative)
+def save_report(analysis, visualization_file, narrative):
+    """Save the analysis and narrative into README.md."""
+    with open("README.md", "w") as file:
+        file.write(f"""
+# Dataset Analysis Report
 
-if __name__ == "__main__":
+## Overview
+
+### Dataset Summary
+
+- **Shape:** {analysis['Shape']}
+- **Columns:** {analysis['Columns']}
+- **Missing Values:** {analysis['Missing Values']}
+
+### Sample Data
+
+```
+{pd.DataFrame(analysis['Sample Data']).to_string(index=False)}
+
+```
+
+## Visualizations
+
+### Correlation Matrix
+
+{f"![Correlation Matrix]({visualization_file})" if visualization_file else "No numeric data available for visualization."}
+
+## Insights and Suggestions
+
+{narrative}
+""")
+    print("README.md file created.")
+
+def main():
     if len(sys.argv) != 2:
         print("Usage: python autolysis.py <dataset.csv>")
         sys.exit(1)
-    main(sys.argv[1])
+
+    file_path = sys.argv[1]
+    if not os.path.exists(file_path):
+        print(f"Error: File '{file_path}' not found.")
+        sys.exit(1)
+
+    data = load_data(file_path)
+    analysis = analyze_data(data)
+    visualization_file = visualize_data(data)
+    narrative = generate_narrative(analysis)
+    save_report(analysis, visualization_file, narrative)
+    print("Analysis complete. Files generated:")
+    print("- README.md")
+    if visualization_file:
+        print(f"- {visualization_file}")
+
+if __name__ == "__main__":
+    main()
