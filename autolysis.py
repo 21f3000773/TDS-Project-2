@@ -5,7 +5,7 @@
 #   "seaborn",
 #   "matplotlib",
 #   "httpx",
-#   "chardet",
+#   "openai",
 #   "python-dotenv",
 # ]
 # ///
