@@ -1,3 +1,14 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "httpx",
+#     "pandas",
+#     "platformdirs",
+#     "python-dotenv",
+#     "rich",
+# ]
+# ///
+
 import os
 import sys
 import pandas as pd
@@ -116,13 +127,4 @@ if __name__ == "__main__":
         sys.exit(1)
     main(sys.argv[1])
 
-# /// script
-# requires-python = ">=3.12"
-# dependencies = [
-#     "httpx",
-#     "pandas",
-#     "platformdirs",
-#     "python-dotenv",
-#     "rich",
-# ]
-# ///
+
