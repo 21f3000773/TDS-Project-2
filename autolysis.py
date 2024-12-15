@@ -20,6 +20,7 @@ import seaborn as sns
 import requests
 import json
 import chardet
+from scipy import stats
 
 def load_csv(filename):
     """Load a CSV file and return a DataFrame."""
@@ -36,27 +37,38 @@ def load_csv(filename):
         print(f"Error loading file: {e}")
         sys.exit(1)
 
+def detect_outliers(df, method='zscore'):
+    """Detect outliers using Z-score or IQR method."""
+    numeric_cols = df.select_dtypes(include=['number'])
+    outliers = {}
 
-def generate_summary(df):
-    """Generate a summary of the dataset."""
+    if method == 'zscore':
+        # Z-score method
+        z_scores = stats.zscore(numeric_cols.fillna(0))
+        outliers = (z_scores > 3).sum(axis=0)  # Z-score > 3 as outlier
+    elif method == 'iqr':
+        # IQR method
+        Q1 = numeric_cols.quantile(0.25)
+        Q3 = numeric_cols.quantile(0.75)
+        IQR = Q3 - Q1
+        outliers = ((numeric_cols < (Q1 - 1.5 * IQR)) | (numeric_cols > (Q3 + 1.5 * IQR))).sum(axis=0)
+    
+    return outliers
+
+def generate_summary(df, outlier_method='zscore'):
+    """Generate a summary of the dataset, including outlier detection."""
     summary = {
         "shape": df.shape,
         "columns": [
-            {"name": col, "type": str(df[col].dtype), "examples": df[col].dropna().unique()[:5].tolist()}
+            {"name": col, "type": str(df[col].dtype), "examples": df[col].dropna().unique()[:3].tolist()}
             for col in df.columns
         ],
         "missing_values": df.isnull().sum().to_dict(),
         "summary_statistics": df.describe(include='all').to_dict(),
     }
 
-    # Detect outliers using Z-scores (optional: could improve this section based on dataset)
-    from scipy import stats
-    numeric_cols = df.select_dtypes(include=['number'])
-    z_scores = stats.zscore(numeric_cols.fillna(0))
-    outliers = (z_scores > 3).sum(axis=0)  # Consider Z-score > 3 as an outlier
-    summary['outliers'] = {col: outliers.iloc[i] for i, col in enumerate(numeric_cols.columns)}
-
-
+    # Detect outliers
+    summary['outliers'] = detect_outliers(df, method=outlier_method)
     return summary
 
 def visualize_data(df):
@@ -100,7 +112,7 @@ def query_llm(prompt, token, analysis_results=None):
             {"role": "user", "content": prompt},
         ]
     }
-    
+
     # Adjusting the prompt based on missing values or outliers if present
     if analysis_results and 'outliers' in analysis_results:
         prompt += "\nAdditionally, the dataset has outliers in the following columns:\n"
@@ -176,7 +188,7 @@ def main():
 
     # Load and summarize the dataset
     df = load_csv(filename)
-    summary = generate_summary(df)
+    summary = generate_summary(df, outlier_method='iqr')  # Default outlier method changed to IQR
 
     # Query LLM for analysis and storytelling
     prompt = (
