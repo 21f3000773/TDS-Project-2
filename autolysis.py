@@ -1,125 +1,176 @@
 # /// script
-# requires-python = ">=3.12"
+# requires-python = ">=3.11"
 # dependencies = [
-#     "httpx",
-#     "pandas",
-#     "chardet",
-#     "matplotlib",
-#     "python-dotenv",
-#     "rich",
-#     "seaborn",
+#   "seaborn",
+#   "pandas",
+#   "matplotlib",
+#   "httpx",
+#   "chardet",
+#   "numpy",
+#   "requests",
 # ]
 # ///
 
 import os
 import sys
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
-import httpx
+import seaborn as sns
+import requests
+import json
 import chardet
 
 
-# Constants
-API_URL = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
-AIPROXY_TOKEN = input("Please enter your API token: ")
+def load_csv(filename):
+    """Load a CSV file and return a DataFrame."""
+    try:
+        # Detect file encoding
+        with open(filename, 'rb') as f:
+            result = chardet.detect(f.read())
+            encoding = result['encoding']
+        
+        # Load the CSV file with detected encoding
+        df = pd.read_csv(filename, encoding=encoding)
+        return df
+    except Exception as e:
+        print(f"Error loading file: {e}")
+        sys.exit(1)
 
-# Utility Functions
-def load_data(file_path):
-    """Load CSV data with encoding detection."""
-    with open(file_path, 'rb') as f:
-        result = chardet.detect(f.read())
-    encoding = result['encoding']
-    return pd.read_csv(file_path, encoding=encoding)
 
-def analyze_data(df):
-    """Perform generic data analysis."""
-    numeric_df = df.select_dtypes(include=['number'])
-    analysis = {
-        'summary': df.describe(include='all').to_dict(),
-        'missing_values': df.isnull().sum().to_dict(),
-        'correlation': numeric_df.corr().to_dict(),
+def generate_summary(df):
+    """Generate a summary of the dataset."""
+    summary = {
+        "shape": df.shape,
+        "columns": [
+            {"name": col, "type": str(df[col].dtype), "examples": df[col].dropna().unique()[:5].tolist()}
+            for col in df.columns
+        ],
+        "missing_values": df.isnull().sum().to_dict(),
+        "summary_statistics": df.describe(include='all').to_dict(),
     }
-    return analysis
+    return summary
 
 def visualize_data(df):
-    """Generate and save up to 5 visualizations, including a heatmap."""
-    sns.set(style="whitegrid")
-    numeric_columns = df.select_dtypes(include=['number']).columns
+    """Generate visualizations and save them as PNG files."""
+    output_files = []
 
-    visualizations = []
-
-    # Distribution plots (limit to 4)
-    for i, column in enumerate(numeric_columns[:4]):
-        plt.figure()
-        sns.histplot(df[column].dropna(), kde=True)
-        plt.title(f'Distribution of {column}')
-        filename = f'{column}_distribution.png'
-        plt.savefig(filename, dpi=100, bbox_inches='tight')
-        plt.close()
-        visualizations.append(filename)
-
-    # Heatmap for correlation (always include if possible)
-    if len(numeric_columns) > 1:
-        plt.figure(figsize=(8, 6))
-        correlation_matrix = df[numeric_columns].corr()
-        sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap="coolwarm")
+    # Correlation heatmap for numeric columns
+    numeric_cols = df.select_dtypes(include=['number'])
+    if not numeric_cols.empty:
+        plt.figure(figsize=(6, 6))  # Adjust dimensions to 512x512 px
+        corr_matrix = numeric_cols.corr()
+        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm")
+        heatmap_file = "correlation_heatmap.png"
         plt.title("Correlation Heatmap")
-        heatmap_filename = "correlation_heatmap.png"
-        plt.savefig(heatmap_filename, dpi=100, bbox_inches='tight')
+        plt.savefig(heatmap_file, dpi=100)
         plt.close()
-        visualizations.append(heatmap_filename)
+        output_files.append(heatmap_file)
 
-    return visualizations
+    # Distribution plots for up to 2 numeric columns
+    for i, col in enumerate(numeric_cols.columns[:2]):
+        plt.figure(figsize=(6, 6))  # Adjust dimensions to 512x512 px
+        sns.histplot(df[col], kde=True, bins=30)
+        plt.title(f"Distribution of {col}")
+        dist_file = f"{col}_distribution.png"
+        plt.savefig(dist_file, dpi=100)
+        plt.close()
+        output_files.append(dist_file)
 
-def generate_narrative(analysis, visualizations):
-    """Generate a story based on the analysis using LLM."""
+    return output_files
+
+def query_llm(prompt, token):
+    """Query the GPT-4o-Mini LLM via AI Proxy and return the response."""
     headers = {
-        'Authorization': f'Bearer {AIPROXY_TOKEN}',
-        'Content-Type': 'application/json'
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
     }
-    prompt = (
-        f"The data analysis revealed the following insights:\n"
-        f"Summary Statistics: {analysis['summary']}\n"
-        f"Missing Values: {analysis['missing_values']}\n"
-        f"Correlation Matrix: {analysis['correlation']}\n"
-        f"Additionally, the following visualizations were created: {visualizations}.\n"
-        "Based on this information, write a comprehensive analysis and provide actionable insights."
-    )
-    data = {
+    payload = {
         "model": "gpt-4o-mini",
-        "messages": [{"role": "user", "content": prompt}]
+        "messages": [
+            {"role": "system", "content": "You are an expert data analyst."},
+            {"role": "user", "content": prompt},
+        ]
     }
+    api_url = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
     try:
-        response = httpx.post(API_URL, headers=headers, json=data, timeout=30.0)
+        response = requests.post(api_url, headers=headers, json=payload)
         response.raise_for_status()
         return response.json()['choices'][0]['message']['content']
-    except httpx.HTTPStatusError as e:
-        print(f"HTTP error occurred: {e}")
-    except httpx.RequestError as e:
-        print(f"Request error occurred: {e}")
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-    return "Narrative generation failed due to an error."
+        print(f"Error querying AI Proxy: {e}")
+        sys.exit(1)
 
-def main(file_path):
-    df = load_data(file_path)
-    analysis = analyze_data(df)
-    visualizations = visualize_data(df)
+def write_readme(summary, analysis, insights, output_files):
+    """Write the README.md file."""
+    with open("README.md", "w") as f:
+        f.write("# Automated Data Analysis Report\n\n")
+        
+        # Dataset Summary
+        f.write("## Dataset Summary\n")
+        f.write(f"The dataset contains {summary['shape'][0]} rows and {summary['shape'][1]} columns.\n\n")
+        f.write("### Column Details:\n")
+        for col in summary['columns']:
+            f.write(f"- **{col['name']}** ({col['type']}): Example values: {col['examples']}\n")
+        f.write("\n")
+        
+        f.write("### Missing Values:\n")
+        for col, missing in summary['missing_values'].items():
+            f.write(f"- {col}: {missing} missing values\n")
+        f.write("\n")
+        
+        # Analysis and Insights
+        f.write("## Analysis and Insights\n")
+        f.write("### The Analysis\n")
+        f.write(analysis)
+        f.write("\n\n")
 
-    # Generate narrative using the analysis and visualizations
-    narrative = generate_narrative(analysis, visualizations)
+        f.write("### Insights\n")
+        f.write(insights)
+        f.write("\n\n")
 
-    # Save narrative to README.md, include the heatmap
-    with open('README.md', 'w') as f:
-        f.write(narrative)
-        if "correlation_heatmap.png" in visualizations:
-            f.write("\n\n![Correlation Heatmap](correlation_heatmap.png)")
+        f.write("### Implications\n")
+        f.write("Based on these insights, here are some potential actions or considerations:\n")
+        f.write("- Explore specific outliers or trends highlighted in the analysis.\n")
+        f.write("- Utilize identified correlations for predictive modeling or strategy formulation.\n")
+        f.write("- Address missing or anomalous data to improve data quality.\n")
+        f.write("\n\n")
+        
+        # Visualizations
+        f.write("## Visualizations\n")
+        for file in output_files:
+            f.write(f"![{file}]({file})\n")
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: uv run autolysis.py <dataset.csv>")
+        sys.exit(1)
+
+    filename = sys.argv[1]
+    token = os.environ.get("AIPROXY_TOKEN")
+    if not token:
+        print("Error: AIPROXY_TOKEN environment variable not set.")
+        sys.exit(1)
+
+    # Load and summarize the dataset
+    df = load_csv(filename)
+    summary = generate_summary(df)
+
+    # Query LLM for analysis and storytelling
+    prompt = (
+        "Here is a summary of a dataset:\n" +
+        f"The dataset contains {summary['shape'][0]} rows and {summary['shape'][1]} columns.\n" +
+        "Column details and missing values are as follows:\n" +
+        "\n".join([f"- {col['name']} ({col['type']}): {col['examples']} examples; {summary['missing_values'][col['name']]} missing values" for col in summary['columns']]) +
+        "\nPlease analyze this dataset and provide insights as a story."
+    )
+    insights = query_llm(prompt, token)
+
+    # Visualize data
+    output_files = visualize_data(df)
+
+    # Write README.md
+    write_readme(summary, prompt, insights, output_files)
+    print("Analysis complete. README.md and visualizations generated.")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python autolysis.py <dataset.csv>")
-        sys.exit(1)
-    main(sys.argv[1])
-
-
+    main()
