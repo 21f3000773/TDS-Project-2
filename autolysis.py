@@ -222,7 +222,4 @@ def main():
     # Query LLM for analysis and storytelling
     prompt = (
         "Here is a summary of a dataset:\n" +
-        f"The dataset contains {summary['shape'][0]} rows and {summary['shape'][1]} columns.\n" +
-        "Column details and missing values are as follows:\n" +
-       "\n".join([f"- {col['name']} ({col['type']}): {col['examples']} examples; {summary['missing_values'][col['name']]} missing values" for col in summary['columns']]) + "\n")
-
+        f"The dataset contains {summary['shape']}")
