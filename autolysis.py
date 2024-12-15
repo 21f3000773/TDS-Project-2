@@ -56,20 +56,36 @@ def detect_outliers(df, method='zscore'):
     return outliers
 
 def generate_summary(df, outlier_method='zscore'):
-    """Generate a summary of the dataset, including outlier detection."""
+    """Generate a summary of the dataset with enhanced statistical insights."""
     summary = {
         "shape": df.shape,
         "columns": [
-            {"name": col, "type": str(df[col].dtype), "examples": df[col].dropna().unique()[:3].tolist()}
+            {"name": col, "type": str(df[col].dtype), "examples": df[col].dropna().unique()[:5].tolist()}
             for col in df.columns
         ],
         "missing_values": df.isnull().sum().to_dict(),
         "summary_statistics": df.describe(include='all').to_dict(),
     }
 
-    # Detect outliers
-    summary['outliers'] = detect_outliers(df, method=outlier_method)
+    # Enhanced analysis: Outlier detection based on selected method
+    numeric_cols = df.select_dtypes(include=['number'])
+
+    if outlier_method == 'zscore':
+        # Z-score calculation for outlier detection
+        z_scores = stats.zscore(numeric_cols.fillna(0))
+        outliers = (z_scores > 3).sum(axis=0)  # Consider Z-score > 3 as an outlier
+        summary['outliers'] = {col: outliers.iloc[i] for i, col in enumerate(numeric_cols.columns)}
+    
+    elif outlier_method == 'iqr':
+        # IQR for outlier detection
+        Q1 = numeric_cols.quantile(0.25)
+        Q3 = numeric_cols.quantile(0.75)
+        IQR = Q3 - Q1
+        iqr_outliers = ((numeric_cols < (Q1 - 1.5 * IQR)) | (numeric_cols > (Q3 + 1.5 * IQR))).sum()
+        summary['iqr_outliers'] = {col: iqr_outliers[col] for col in numeric_cols.columns}
+
     return summary
+
 
 def visualize_data(df):
     """Generate visualizations and save them as PNG files."""
@@ -78,13 +94,22 @@ def visualize_data(df):
     # Correlation heatmap for numeric columns
     numeric_cols = df.select_dtypes(include=['number'])
     if not numeric_cols.empty:
-        plt.figure(figsize=(6, 6))  # Adjust dimensions to 512x512 px
+        plt.figure(figsize=(8, 8))  # Adjust dimensions to 512x512 px
         corr_matrix = numeric_cols.corr()
         sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", cbar_kws={'label': 'Correlation coefficient'})
-        plt.title("Correlation Heatmap")
+        plt.title("Correlation Heatmap of Numerical Columns")
         plt.savefig("correlation_heatmap.png", dpi=100)
         plt.close()
         output_files.append("correlation_heatmap.png")
+
+        # Enhanced analysis: correlation significance
+        for col1 in numeric_cols.columns:
+            for col2 in numeric_cols.columns:
+                if col1 != col2:
+                    correlation, p_value = stats.pearsonr(df[col1].dropna(), df[col2].dropna())
+                    print(f"Correlation between {col1} and {col2}: {correlation:.2f}, p-value: {p_value:.4f}")
+                    if p_value < 0.05:
+                        print(f"Significant correlation between {col1} and {col2}")
 
     # Distribution plots for up to 2 numeric columns
     for i, col in enumerate(numeric_cols.columns[:2]):
