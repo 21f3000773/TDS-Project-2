@@ -8,6 +8,7 @@
 #   "chardet",
 #   "numpy",
 #   "requests",
+#   "scipy",
 # ]
 # ///
 
@@ -47,6 +48,15 @@ def generate_summary(df):
         "missing_values": df.isnull().sum().to_dict(),
         "summary_statistics": df.describe(include='all').to_dict(),
     }
+
+    # Detect outliers using Z-scores (optional: could improve this section based on dataset)
+    from scipy import stats
+    numeric_cols = df.select_dtypes(include=['number'])
+    z_scores = stats.zscore(numeric_cols.fillna(0))
+    outliers = (z_scores > 3).sum(axis=0)  # Consider Z-score > 3 as an outlier
+    summary['outliers'] = {col: outliers.iloc[i] for i, col in enumerate(numeric_cols.columns)}
+
+
     return summary
 
 def visualize_data(df):
@@ -68,7 +78,7 @@ def visualize_data(df):
     # Distribution plots for up to 2 numeric columns
     for i, col in enumerate(numeric_cols.columns[:2]):
         plt.figure(figsize=(6, 6))  # Adjust dimensions to 512x512 px
-        sns.histplot(df[col], kde=True, bins=30)
+        sns.histplot(df[col], kde=True, bins=30, color="skyblue" if df[col].mean() > 0 else "salmon")
         plt.title(f"Distribution of {col}")
         dist_file = f"{col}_distribution.png"
         plt.savefig(dist_file, dpi=100)
@@ -77,7 +87,7 @@ def visualize_data(df):
 
     return output_files
 
-def query_llm(prompt, token):
+def query_llm(prompt, token, analysis_results=None):
     """Query the GPT-4o-Mini LLM via AI Proxy and return the response."""
     headers = {
         "Authorization": f"Bearer {token}",
@@ -90,6 +100,14 @@ def query_llm(prompt, token):
             {"role": "user", "content": prompt},
         ]
     }
+    
+    # Adjusting the prompt based on missing values or outliers if present
+    if analysis_results and 'outliers' in analysis_results:
+        prompt += "\nAdditionally, the dataset has outliers in the following columns:\n"
+        for col, count in analysis_results['outliers'].items():
+            if count > 0:
+                prompt += f"- {col}: {count} potential outliers\n"
+
     api_url = "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions"
     try:
         response = requests.post(api_url, headers=headers, json=payload)
@@ -115,6 +133,12 @@ def write_readme(summary, analysis, insights, output_files):
         f.write("### Missing Values:\n")
         for col, missing in summary['missing_values'].items():
             f.write(f"- {col}: {missing} missing values\n")
+        f.write("\n")
+        
+        f.write("### Outliers Detected:\n")
+        for col, count in summary['outliers'].items():
+            if count > 0:
+                f.write(f"- {col}: {count} potential outliers\n")
         f.write("\n")
         
         # Analysis and Insights
@@ -162,7 +186,7 @@ def main():
         "\n".join([f"- {col['name']} ({col['type']}): {col['examples']} examples; {summary['missing_values'][col['name']]} missing values" for col in summary['columns']]) +
         "\nPlease analyze this dataset and provide insights as a story."
     )
-    insights = query_llm(prompt, token)
+    insights = query_llm(prompt, token, analysis_results=summary)
 
     # Visualize data
     output_files = visualize_data(df)
