@@ -74,7 +74,7 @@ def generate_summary(df, outlier_method='zscore'):
         # Z-score calculation for outlier detection
         z_scores = stats.zscore(numeric_cols.fillna(0))
         outliers = (z_scores > 3).sum(axis=0)  # Consider Z-score > 3 as an outlier
-        summary['outliers'] = {col: outliers.iloc[i] for i, col in enumerate(numeric_cols.columns)}
+        summary['outliers'] = {col: outliers[i] for i, col in enumerate(numeric_cols.columns)}
     
     elif outlier_method == 'iqr':
         # IQR for outlier detection
@@ -107,9 +107,10 @@ def visualize_data(df):
             for col2 in numeric_cols.columns:
                 if col1 != col2:
                     correlation, p_value = stats.pearsonr(df[col1].dropna(), df[col2].dropna())
-                    print(f"Correlation between {col1} and {col2}: {correlation:.2f}, p-value: {p_value:.4f}")
                     if p_value < 0.05:
-                        print(f"Significant correlation between {col1} and {col2}")
+                        print(f"Significant correlation between {col1} and {col2}: {correlation:.2f}, p-value: {p_value:.4f}")
+                    else:
+                        print(f"Correlation between {col1} and {col2}: {correlation:.2f}, p-value: {p_value:.4f}")
 
     # Distribution plots for up to 2 numeric columns
     for i, col in enumerate(numeric_cols.columns[:2]):
@@ -223,17 +224,4 @@ def main():
         "Here is a summary of a dataset:\n" +
         f"The dataset contains {summary['shape'][0]} rows and {summary['shape'][1]} columns.\n" +
         "Column details and missing values are as follows:\n" +
-        "\n".join([f"- {col['name']} ({col['type']}): {col['examples']} examples; {summary['missing_values'][col['name']]} missing values" for col in summary['columns']]) +
-        "\nPlease analyze this dataset and provide insights as a story."
-    )
-    insights = query_llm(prompt, token, analysis_results=summary)
-
-    # Visualize data
-    output_files = visualize_data(df)
-
-    # Write README.md
-    write_readme(summary, prompt, insights, output_files)
-    print("Analysis complete. README.md and visualizations generated.")
-
-if __name__ == "__main__":
-    main()
+        "\n".join([f"- {col['name']} ({col['type']}): {col['examples']} examples; {summary['missing_values'][col['
