@@ -80,24 +80,27 @@ def visualize_data(df):
     if not numeric_cols.empty:
         plt.figure(figsize=(6, 6))  # Adjust dimensions to 512x512 px
         corr_matrix = numeric_cols.corr()
-        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm")
-        heatmap_file = "correlation_heatmap.png"
+        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", cbar_kws={'label': 'Correlation coefficient'})
         plt.title("Correlation Heatmap")
-        plt.savefig(heatmap_file, dpi=100)
+        plt.savefig("correlation_heatmap.png", dpi=100)
         plt.close()
-        output_files.append(heatmap_file)
+        output_files.append("correlation_heatmap.png")
 
     # Distribution plots for up to 2 numeric columns
     for i, col in enumerate(numeric_cols.columns[:2]):
         plt.figure(figsize=(6, 6))  # Adjust dimensions to 512x512 px
-        sns.histplot(df[col], kde=True, bins=30, color="skyblue" if df[col].mean() > 0 else "salmon")
+        sns.histplot(df[col], kde=True, bins=30, color="skyblue" if df[col].mean() > 0 else "salmon", label=col)
         plt.title(f"Distribution of {col}")
+        plt.xlabel(f'{col} Values')
+        plt.ylabel('Frequency')
+        plt.legend(title=f"{col} Distribution", loc='upper right')
         dist_file = f"{col}_distribution.png"
         plt.savefig(dist_file, dpi=100)
         plt.close()
         output_files.append(dist_file)
 
     return output_files
+
 
 def query_llm(prompt, token, analysis_results=None):
     """Query the GPT-4o-Mini LLM via AI Proxy and return the response."""
